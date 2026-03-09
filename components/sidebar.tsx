@@ -67,10 +67,22 @@ function EmailCapture() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: trimmedEmail }),
       })
+      
+      // Check if response is JSON
+      const contentType = res.headers.get("content-type")
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await res.text()
+        console.log("[v0] Non-JSON response:", text.substring(0, 200))
+        setStatus({ success: false, message: "Server error. Please try again." })
+        return
+      }
+      
       const data = await res.json()
+      console.log("[v0] Subscribe response:", data)
       setStatus(data)
-    } catch {
-      setStatus({ success: false, message: "Something went wrong. Please try again." })
+    } catch (err) {
+      console.log("[v0] Subscribe error:", err)
+      setStatus({ success: false, message: "Connection error. Please try again." })
     } finally {
       setPending(false)
     }

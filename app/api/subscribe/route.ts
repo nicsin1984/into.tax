@@ -19,9 +19,11 @@ const BLOCKED_DOMAINS = new Set([
 ])
 
 export async function POST(request: Request) {
+  console.log("[v0] Subscribe API called")
   try {
     const body = await request.json()
     const email = (body.email ?? "").trim().toLowerCase()
+    console.log("[v0] Email received:", email)
 
     if (!email || !email.includes("@")) {
       return NextResponse.json(
@@ -38,9 +40,12 @@ export async function POST(request: Request) {
       )
     }
 
+    console.log("[v0] Creating Supabase client")
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
     const token = generateToken()
+    console.log("[v0] Token generated:", token.substring(0, 10) + "...")
 
+    console.log("[v0] Attempting Supabase insert")
     const { error: insertError } = await supabase
       .from("subscribers")
       .insert({ 
@@ -52,6 +57,8 @@ export async function POST(request: Request) {
         confirmation_token: token
       })
 
+    console.log("[v0] Insert result:", insertError ? `Error: ${insertError.message}` : "Success")
+    
     if (insertError) {
       if (insertError.code === "23505") {
         return NextResponse.json(

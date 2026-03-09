@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
+import { useSearchParams } from "next/navigation"
 import type { Article, KeyDate, Spotlight } from "@/lib/queries"
 import { CategoryNav } from "@/components/category-nav"
 import { LeadStories } from "@/components/lead-stories"
 import { WireFeed } from "@/components/wire-feed"
 import { Sidebar } from "@/components/sidebar"
-import { Search, X } from "lucide-react"
+import { Search, X, CheckCircle, AlertCircle } from "lucide-react"
 
 type LeadStory = Article & { cluster: Article[] }
 
@@ -27,6 +28,7 @@ export function HomepageContent({
   governanceArticles: Article[]
   spotlights: Spotlight[]
 }) {
+  const searchParams = useSearchParams()
   const [activeCategory, setActiveCategory] = useState("All")
   const [activeTags, setActiveTags] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState("")
@@ -35,8 +37,19 @@ export function HomepageContent({
   const [leadStories, setLeadStories] = useState<LeadStory[]>(initialLeadStories)
   const [loading, setLoading] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
+  const [signupBanner, setSignupBanner] = useState<"confirmed" | "invalid" | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const articleRefs = useRef<(HTMLElement | null)[]>([])
+
+  // Check URL for signup status
+  useEffect(() => {
+    const signup = searchParams.get("signup")
+    if (signup === "confirmed" || signup === "invalid") {
+      setSignupBanner(signup)
+      // Clear the URL parameter without refresh
+      window.history.replaceState({}, "", window.location.pathname)
+    }
+  }, [searchParams])
 
   // Fetch filtered articles from API
   const fetchArticles = useCallback(async (category: string, tags: string[], search: string) => {
@@ -190,6 +203,36 @@ export function HomepageContent({
 
   return (
     <>
+      {/* Signup confirmation banner */}
+      {signupBanner && (
+        <div 
+          className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 max-w-lg w-[calc(100%-2rem)] rounded-lg shadow-lg border px-4 py-3 flex items-start gap-3 ${
+            signupBanner === "confirmed" 
+              ? "bg-[#E8F5E9] border-[#A5D6A7] text-[#2E7D32]" 
+              : "bg-[#FFF3E0] border-[#FFCC80] text-[#E65100]"
+          }`}
+        >
+          {signupBanner === "confirmed" ? (
+            <CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          ) : (
+            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          )}
+          <p className="text-sm flex-1">
+            {signupBanner === "confirmed" 
+              ? "You're in. First digest arrives Friday morning. Any questions — nicky@into.tax"
+              : "That confirmation link isn't valid. Please try signing up again."
+            }
+          </p>
+          <button 
+            onClick={() => setSignupBanner(null)}
+            className="shrink-0 p-1 hover:bg-black/10 rounded transition-colors"
+            aria-label="Dismiss"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Search overlay */}
       {searchOpen && (
         <div className="fixed inset-0 bg-background/95 z-50 flex items-start justify-center pt-[20vh]">
