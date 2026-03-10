@@ -5,6 +5,7 @@ import { getKeyDates } from "@/lib/queries"
 import Link from "next/link"
 import { Linkedin } from "lucide-react"
 import { SpotlightShareButtons, ShareThisWeekButton } from "@/components/spotlight-share"
+import { ScrollToHash } from "@/components/scroll-to-hash"
 
 export const revalidate = 0
 export const dynamic = 'force-dynamic'
@@ -88,6 +89,7 @@ export default async function SpotlightArchivePage() {
 
   return (
     <div className="min-h-screen bg-[#FDFCFA]">
+      <ScrollToHash />
       <Masthead />
       <DeadlineTicker dates={keyDates} />
       
