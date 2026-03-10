@@ -32,7 +32,7 @@ const BLOCKED_DOMAINS = new Set([
   "talktalk.net",
 ])
 
-function EmailCapture() {
+export function EmailCapture() {
   const [status, setStatus] = useState<{ success: boolean; message: string } | null>(null)
   const [pending, setPending] = useState(false)
   const [email, setEmail] = useState("")
@@ -439,7 +439,10 @@ export function Sidebar({
 }) {
   return (
     <aside className="flex flex-col gap-6">
-      <EmailCapture />
+      {/* Hidden on mobile - shown at top of page instead */}
+      <div className="hidden md:block">
+        <EmailCapture />
+      </div>
       <SpotlightPanel spotlights={spotlights} />
       <TrendingStories articles={trending} />
       <div className="border-t border-border" />
