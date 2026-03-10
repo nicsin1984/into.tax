@@ -2,11 +2,11 @@ import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
+const SUPABASE_URL = 'https://ibktckdphhwjnmvzwssu.supabase.co'
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlia3Rja2RwaGh3am5tdnp3c3N1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MzQxNzgsImV4cCI6MjA4ODIxMDE3OH0.-QXSfvi848zGDglMsU3hu2A6RWXKHRpMYPwuTpbko2s'
+
 export async function GET(request: NextRequest) {
-  const supabase = createClient(
-    'https://ibktckdphhwjnmvzwssu.supabase.co',
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
-  );
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
   const resend = new Resend(process.env.RESEND_API_KEY);
   const token = request.nextUrl.searchParams.get("token");
 
