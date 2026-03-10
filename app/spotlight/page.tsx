@@ -128,7 +128,7 @@ export default async function SpotlightArchivePage() {
                       <article
                         key={s.id}
                         id={slug}
-                        className="relative bg-[#FFFDF9] rounded-lg p-8 md:p-10 shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden scroll-mt-24"
+                        className="relative bg-[#FFFDF9] rounded-lg p-8 md:p-10 shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden scroll-mt-32"
                       >
                         {/* Decorative quotation mark */}
                         <div 
