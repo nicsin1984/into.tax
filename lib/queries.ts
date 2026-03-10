@@ -74,14 +74,14 @@ export async function getLeadStories() {
 }
 
 /**
- * Wire articles: all articles ordered by created_at DESC.
+ * Wire articles: all articles ordered by published_at DESC.
  */
 export async function getWireArticles() {
   const supabase = createClient()
   const { data, error } = await supabase
     .from("articles")
     .select("*")
-    .order("created_at", { ascending: false })
+    .order("published_at", { ascending: false })
     .limit(30)
 
   return data || []
@@ -137,7 +137,7 @@ export async function getCategoryCounts() {
 }
 
 /**
- * Get articles filtered by category, ordered by created_at DESC.
+ * Get articles filtered by category, ordered by published_at DESC.
  */
 export async function getArticlesByCategory(category: string) {
   const supabase = createClient()
@@ -145,7 +145,7 @@ export async function getArticlesByCategory(category: string) {
     .from("articles")
     .select("*")
     .eq("category", category)
-    .order("created_at", { ascending: false })
+    .order("published_at", { ascending: false })
 
   return data || []
 }
@@ -159,7 +159,7 @@ export async function getArticlesByTag(tag: string) {
     .from("articles")
     .select("*")
     .contains("tags", [tag])
-    .order("created_at", { ascending: false })
+    .order("published_at", { ascending: false })
 
   return data || []
 }
@@ -175,7 +175,7 @@ export async function getGovernanceArticles() {
     .select("*")
     .eq("category", "hmrc-practice")
     .contains("tags", ["Compliance"])
-    .order("created_at", { ascending: false })
+    .order("published_at", { ascending: false })
     .limit(3)
 
   return data || []
@@ -224,7 +224,7 @@ export async function getFilteredArticles(options: {
   let query = supabase
     .from("articles")
     .select("*")
-    .order("created_at", { ascending: false })
+    .order("published_at", { ascending: false })
 
   // Category filter
   if (options.category && options.category !== "All") {

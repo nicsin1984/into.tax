@@ -6,7 +6,7 @@ import type { Article, KeyDate, Spotlight } from "@/lib/queries"
 import { CategoryNav } from "@/components/category-nav"
 import { LeadStories } from "@/components/lead-stories"
 import { WireFeed } from "@/components/wire-feed"
-import { Sidebar } from "@/components/sidebar"
+import { Sidebar, EmailCapture } from "@/components/sidebar"
 import { Search, X, CheckCircle, AlertCircle } from "lucide-react"
 
 type LeadStory = Article & { cluster: Article[] }
@@ -299,6 +299,11 @@ export function HomepageContent({
         onSearchClick={openSearch}
       />
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-6">
+        {/* Mobile-only Weekly Digest at top */}
+        <div className="md:hidden mb-6">
+          <EmailCapture />
+        </div>
+        
         <div className="flex flex-col md:flex-row gap-6 md:gap-8">
           {/* Main column */}
           <main className="flex-1 min-w-0">
