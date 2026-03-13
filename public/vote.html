@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reader Verdict | into.tax</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background-color: #f4f4f7;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      max-width: 480px;
+      width: 100%;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .header {
+      background-color: #0f1f3c;
+      padding: 24px 32px;
+    }
+    .header h1 {
+      font-size: 22px;
+      color: #ffffff;
+      letter-spacing: -0.3px;
+    }
+    .header span {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 11px;
+      color: #8899b3;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .body {
+      padding: 32px;
+    }
+    .loading, .success, .error, .already-voted {
+      display: none;
+    }
+    .active {
+      display: block !important;
+    }
+    .success .tick {
+      width: 56px;
+      height: 56px;
+      background: #d4edda;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 28px;
+    }
+    .body h2 {
+      font-size: 20px;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .body p {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 14px;
+      color: #6b7a94;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .response-label {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 13px;
+      color: #0f1f3c;
+      background: #f4f4f7;
+      border: 1px solid #e8eaed;
+      border-radius: 6px;
+      padding: 10px 16px;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+    .cta {
+      display: inline-block;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 13px;
+      color: #c9a84c;
+      text-decoration: none;
+      border: 1px solid #c9a84c;
+      border-radius: 6px;
+      padding: 10px 20px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .cta:hover {
+      background: #c9a84c;
+      color: #ffffff;
+    }
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #e8eaed;
+      border-top: 3px solid #0f1f3c;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .footer {
+      padding: 16px 32px;
+      border-top: 1px solid #e8eaed;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 11px;
+      color: #8899b3;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <h1>into.tax</h1>
+    <span>UK Tax Intelligence</span>
+  </div>
+
+  <div class="body">
+    <!-- Loading state -->
+    <div class="loading active" id="state-loading">
+      <div class="spinner"></div>
+      <h2>Recording your vote...</h2>
+      <p>One moment.</p>
+    </div>
+
+    <!-- Success state -->
+    <div class="success" id="state-success">
+      <div class="tick">&#10003;</div>
+      <h2>Vote recorded</h2>
+      <p>Thanks for your input. You voted:</p>
+      <div class="response-label" id="vote-display"></div>
+      <p>Results will be published in next week's issue.</p>
+      <a href="https://into.tax" class="cta">Read this week's stories &rarr;</a>
+    </div>
+
+    <!-- Already voted state -->
+    <div class="already-voted" id="state-already">
+      <h2>Already voted</h2>
+      <p>You've already submitted your verdict for this issue. We've updated your response to:</p>
+      <div class="response-label" id="vote-display-updated"></div>
+      <p>Results will be published in next week's issue.</p>
+      <a href="https://into.tax" class="cta">Read this week's stories &rarr;</a>
+    </div>
+
+    <!-- Error state -->
+    <div class="error" id="state-error">
+      <h2>Something went wrong</h2>
+      <p id="error-msg">We couldn't record your vote. Please try again or contact us.</p>
+      <a href="https://into.tax" class="cta">Back to into.tax &rarr;</a>
+    </div>
+  </div>
+
+  <div class="footer">
+    Into.tax, 8 Devonshire Square, Spitalfields, London, EC2M 4PL
+  </div>
+</div>
+
+<!-- Supabase JS client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<script>
+  // ===== CONFIGURATION =====
+  // Replace these with your actual Supabase project details
+  const SUPABASE_URL = 'https://ibktckdphhwjnmvzwssu.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlia3Rja2RwaGh3am5tdnp3c3N1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MzQxNzgsImV4cCI6MjA4ODIxMDE3OH0.-QXSfvi848zGDglMsU3hu2A6RWXKHRpMYPwuTpbko2s';
+  // ==========================
+
+  const VALID_RESPONSES = {
+    'fully-prepared': 'Fully prepared — systems and clients ready',
+    'mostly-prepared': 'Mostly prepared — a few clients still to onboard',
+    'behind': 'Behind — significant work still to do',
+    'not-applicable': 'Not applicable to my role'
+  };
+
+  function showState(id) {
+    document.querySelectorAll('.loading, .success, .error, .already-voted').forEach(el => el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  async function recordVote() {
+    const params = new URLSearchParams(window.location.search);
+    const response = params.get('q');
+    const issue = parseInt(params.get('issue'), 10);
+    const email = params.get('email');
+
+    // Validate params
+    if (!response || !issue || !email) {
+      document.getElementById('error-msg').textContent = 'Invalid voting link. This may be a malformed URL — please use the link from your newsletter email.';
+      showState('state-error');
+      return;
+    }
+
+    if (!VALID_RESPONSES[response]) {
+      document.getElementById('error-msg').textContent = 'Invalid response option.';
+      showState('state-error');
+      return;
+    }
+
+    const label = VALID_RESPONSES[response];
+
+    try {
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // Upsert: insert or update if they already voted for this issue
+      const { data, error } = await supabase
+        .from('newsletter_votes')
+        .upsert(
+          { email: email, issue: issue, response: response, voted_at: new Date().toISOString() },
+          { onConflict: 'email,issue' }
+        )
+        .select();
+
+      if (error) {
+        console.error('Supabase error:', error);
+        document.getElementById('error-msg').textContent = 'Could not save your vote. Please try again.';
+        showState('state-error');
+        return;
+      }
+
+      // Show success
+      document.getElementById('vote-display').textContent = label;
+      document.getElementById('vote-display-updated').textContent = label;
+      showState('state-success');
+
+    } catch (err) {
+      console.error('Vote error:', err);
+      document.getElementById('error-msg').textContent = 'Network error. Please check your connection and try again.';
+      showState('state-error');
+    }
+  }
+
+  // Run on page load
+  recordVote();
+</script>
+
+</body>
+</html>
