@@ -5,6 +5,7 @@ import { getKeyDates } from "@/lib/queries"
 import Link from "next/link"
 import { Linkedin } from "lucide-react"
 import { SpotlightShareButtons, ShareThisWeekButton } from "@/components/spotlight-share"
+import { ScrollToHash } from "@/components/scroll-to-hash"
 
 export const revalidate = 0
 export const dynamic = 'force-dynamic'
@@ -88,6 +89,7 @@ export default async function SpotlightArchivePage() {
 
   return (
     <div className="min-h-screen bg-[#FDFCFA]">
+      <ScrollToHash />
       <Masthead />
       <DeadlineTicker dates={keyDates} />
       
@@ -128,7 +130,7 @@ export default async function SpotlightArchivePage() {
                       <article
                         key={s.id}
                         id={slug}
-                        className="relative bg-[#FFFDF9] rounded-lg p-8 md:p-10 shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden scroll-mt-24"
+                        className="relative bg-[#FFFDF9] rounded-lg p-8 md:p-10 shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden scroll-mt-32"
                       >
                         {/* Decorative quotation mark */}
                         <div 
