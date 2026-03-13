@@ -218,7 +218,7 @@
           { email: email, issue: issue, response: response, voted_at: new Date().toISOString() },
           { onConflict: 'email,issue' }
         )
-        .select();
+        ;
 
       if (error) {
         console.error('Supabase error:', error);
