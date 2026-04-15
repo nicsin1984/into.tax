@@ -7,6 +7,7 @@ const supabase = createClient(
     )
 
     export async function BlogTeaser() {
+        try {
       const { data: post } = await supabase
           .from("blog_posts")
               .select("title, slug, excerpt, author, published_at")
@@ -53,5 +54,8 @@ const supabase = createClient(
                                                                                                                                                                                                                                                                                                                           All posts →
                                                                                                                                                                                                                                                                                                                                 </Link>
                                                                                                                                                                                                                                                                                                                                     </div>
-                                                                                                                                                                                                                                                                                                                                      )
+                                                                } catch {
+              return null
+        }
+          )
                                                                                                                                                                                                                                                                                                                                       }
