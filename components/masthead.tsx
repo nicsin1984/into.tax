@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { Search, Moon, Sun, TreePine, Egg, Flame, Heart, Sparkles, Crown, Leaf, Snowflake, Cherry, Ghost, Star, Candy, Citrus, Clover, Music } from "lucide-react"
+import Link from "next/link"
 
 // UK holidays with date ranges (month is 0-indexed)
 // Each holiday shows for 4 days: 2 days before and 2 days after the main date
@@ -17,7 +18,7 @@ type Holiday = {
 // Updated through 2030
 const LUNAR_HOLIDAYS: Record<string, Record<number, { month: number; day: number }>> = {
   "Chinese New Year": {
-    2024: { month: 1, day: 10 },
+    2024: { month: 1, day: 10 },h
     2025: { month: 0, day: 29 },
     2026: { month: 1, day: 17 },
     2027: { month: 1, day: 6 },
@@ -288,6 +289,7 @@ export function Masthead() {
             <span className="text-xs font-mono text-muted-foreground tabular-nums hidden md:inline">
               {time || "--:--:--"} <span className="text-[10px] opacity-60">GMT</span>
             </span>
+                            <Link href="/blog" className="hidden md:inline-flex items-center text-xs font-mono text-muted-foreground hover:text-foreground transition-colors border border-border rounded px-2 py-1 hover:bg-accent">Blog</Link>Link></Link>
             <button
               aria-label="Search"
               onClick={handleSearchClick}
