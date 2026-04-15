@@ -4,7 +4,6 @@ import { useState } from "react"
 import type { Article, KeyDate, Spotlight } from "@/lib/queries"
 import Link from "next/link"
 import { TrendingUp, Calendar, Layers, Shield, Keyboard } from "lucide-react"
-import { BlogTeaser } from "@/components/blog-teaser"
 
 function daysUntil(dateStr: string) {
   const now = new Date()
@@ -457,7 +456,6 @@ export function Sidebar({
       <div className="border-t border-border" />
       <GovernanceCorner articles={governanceArticles} />
       <div className="border-t border-border" />
-                <BlogTeaser />
       <KeyboardShortcuts />
     </aside>
   )
