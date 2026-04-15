@@ -54,7 +54,7 @@ const supabase = createClient(
                                                                                                                                                                                                                                                                                                                           All posts →
                                                                                                                                                                                                                                                                                                                                 </Link>
                                                                                                                                                                                                                                                                                                                                     </div>
-                                                                } catch {
+                                                                } catch (e) {
               return null
         }
           )
