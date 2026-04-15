@@ -289,7 +289,7 @@ export function Masthead() {
             <span className="text-xs font-mono text-muted-foreground tabular-nums hidden md:inline">
               {time || "--:--:--"} <span className="text-[10px] opacity-60">GMT</span>
             </span>
-                            <Link href="/blog" className="hidden md:inline-flex items-center text-xs font-mono text-muted-foreground hover:text-foreground transition-colors border border-border rounded px-2 py-1 hover:bg-accent">Blog</Link>Link></Link>
+                            <Link href="/blog" className="hidden md:inline-flex items-center text-xs font-mono text-muted-foreground hover:text-foreground transition-colors border border-border rounded px-2 py-1 hover:bg-accent">Blog</Link>
             <button
               aria-label="Search"
               onClick={handleSearchClick}
