@@ -18,7 +18,7 @@ type Holiday = {
 // Updated through 2030
 const LUNAR_HOLIDAYS: Record<string, Record<number, { month: number; day: number }>> = {
   "Chinese New Year": {
-    2024: { month: 1, day: 10 },h
+    2024: { month: 1, day: 10 },
     2025: { month: 0, day: 29 },
     2026: { month: 1, day: 17 },
     2027: { month: 1, day: 6 },
