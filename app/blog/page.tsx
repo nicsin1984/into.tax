@@ -7,8 +7,8 @@ export const metadata: Metadata = {
   description: 'Long-form analysis on UK tax intelligence and accountancy governance.',
 }
 
-export const revalidate = 60
-
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
 const SUPABASE_URL = 'https://ibktckdphhwjnmvzwssu.supabase.co'
 
 type BlogPost = {
