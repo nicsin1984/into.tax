@@ -1,59 +1,80 @@
-﻿import { createClient } from "@supabase/supabase-js"
+"use client"
+
+import { useEffect, useState } from "react"
 import Link from "next/link"
+import { createClient } from "@supabase/supabase-js"
+
+type Post = {
+  slug: string
+  title: string
+  excerpt: string | null
+  author: string
+  published_at: string
+}
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 )
 
-export async function BlogTeaser() {
-  try {
-    const { data: post } = await supabase
+function bylineName(author: string) {
+  return author.split(",")[0].trim()
+}
+
+function shortDate(iso: string) {
+  return new Date(iso)
+    .toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+    .toUpperCase()
+}
+
+export function BlogTeaser() {
+  const [posts, setPosts] = useState<Post[]>([])
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    supabase
       .from("blog_posts")
-      .select("title, slug, excerpt, author, published_at")
+      .select("slug, title, excerpt, author, published_at")
       .eq("is_published", true)
       .order("published_at", { ascending: false })
-      .limit(1)
-      .single()
-
-    if (!post) return null
-
-    const formatDate = (iso: string) =>
-      new Date(iso).toLocaleDateString("en-GB", {
-        day: "numeric", month: "short", year: "numeric",
+      .limit(3)
+      .then(({ data, error }) => {
+        if (cancelled) return
+        setPosts(error || !data ? [] : data)
+        setLoaded(true)
       })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
-    return (
-      <div className="mt-6">
-        <h2 className="text-[10px] font-mono text-muted-foreground tracking-widest uppercase mb-3">
+  if (!loaded || posts.length === 0) return null
+
+  return (
+    <div className="rounded border border-border bg-card p-4">
+      <div className="mb-3 flex items-baseline justify-between">
+        <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
           From the blog
         </h2>
-        <Link href={`/blog/${post.slug}`} className="block group">
-          <div className="border border-border rounded-md p-3 hover:border-foreground/30 transition-colors bg-muted/30">
-            <p className="text-sm font-medium text-foreground leading-snug group-hover:underline underline-offset-2 mb-1.5">
-              {post.title}
-            </p>
-            {post.excerpt && (
-              <p className="text-xs text-muted-foreground leading-relaxed mb-2 line-clamp-2">
-                {post.excerpt}
-              </p>
-            )}
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono text-muted-foreground">
-                {post.author} · {formatDate(post.published_at)}
-              </span>
-              <span className="text-[10px] font-mono text-muted-foreground group-hover:text-foreground transition-colors">
-                Read →
-              </span>
-            </div>
-          </div>
-        </Link>
-        <Link href="/blog" className="block mt-2 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors text-right">
+        <Link href="/blog" className="text-xs text-muted-foreground hover:text-foreground">
           All posts →
         </Link>
       </div>
-    )
-  } catch (err) {
-    return null
-  }
+      <ul className="space-y-3">
+        {posts.map((p) => (
+          <li key={p.slug}>
+            <Link href={`/blog/${p.slug}`} className="group block">
+              <p className="text-sm font-medium text-foreground group-hover:underline">
+                {p.title}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {bylineName(p.author)} · {shortDate(p.published_at)}
+              </p>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
 }
