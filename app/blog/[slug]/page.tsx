@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import type { Metadata } from 'next'
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
 export const dynamicParams = true
 
 const SUPABASE_URL = 'https://ibktckdphhwjnmvzwssu.supabase.co'
