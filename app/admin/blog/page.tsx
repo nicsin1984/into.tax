@@ -3,166 +3,174 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
+type Status =
+  | { kind: 'idle' }
+  | { kind: 'uploading' }
+  | { kind: 'ok'; slug: string }
+  | { kind: 'error'; msg: string }
+
 export default function AdminBlogPage() {
   const [password, setPassword] = useState('')
-  const [authed, setAuthed] = useState(false)
   const [title, setTitle] = useState('')
+  const [author, setAuthor] = useState('')
   const [excerpt, setExcerpt] = useState('')
-  const [author, setAuthor] = useState('Nicky Singh')
-  const [file, setFile] = useState<File | null>(null)
-  const [status, setStatus] = useState<
-    { kind: 'idle' } | { kind: 'uploading' } | { kind: 'ok'; slug: string } | { kind: 'error'; msg: string }
-  >({ kind: 'idle' })
+  const [body, setBody] = useState('')
+  const [pdf, setPdf] = useState<File | null>(null)
+  const [status, setStatus] = useState<Status>({ kind: 'idle' })
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!file || !title) {
-      setStatus({ kind: 'error', msg: 'Title and PDF file are required.' })
+    if (!title || !author || !body) {
+      setStatus({ kind: 'error', msg: 'Title, author and body are all required.' })
       return
     }
     setStatus({ kind: 'uploading' })
     try {
       const form = new FormData()
       form.append('title', title)
-      form.append('excerpt', excerpt)
       form.append('author', author)
-      form.append('file', file)
+      form.append('excerpt', excerpt)
+      form.append('body', body)
+      if (pdf) form.append('pdf', pdf)
       const res = await fetch('/api/blog/upload', {
         method: 'POST',
         headers: { 'x-admin-password': password },
         body: form,
       })
-      const body = await res.json()
+      const data = await res.json()
       if (!res.ok) {
-        setStatus({ kind: 'error', msg: body.error || `Upload failed (${res.status})` })
+        setStatus({ kind: 'error', msg: data.error || res.statusText })
         return
       }
-      setStatus({ kind: 'ok', slug: body.slug })
+      setStatus({ kind: 'ok', slug: data.slug })
       setTitle('')
+      setAuthor('')
       setExcerpt('')
-      setFile(null)
+      setBody('')
+      setPdf(null)
     } catch (err) {
       setStatus({
         kind: 'error',
-        msg: err instanceof Error ? err.message : 'Unknown error',
+        msg: err instanceof Error ? err.message : String(err),
       })
     }
   }
 
-  if (!authed) {
-    return (
-      <main className="mx-auto flex min-h-[60vh] max-w-md flex-col justify-center px-6 py-12">
-        <h1 className="mb-6 font-serif text-2xl">Blog Admin</h1>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            if (password.trim()) setAuthed(true)
-          }}
-          className="space-y-4"
-        >
-          <label className="block">
-            <span className="text-sm text-neutral-600">Password</span>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded border border-neutral-300 px-3 py-2"
-              autoFocus
-            />
-          </label>
-          <button
-            type="submit"
-            className="rounded bg-neutral-900 px-4 py-2 text-sm text-white hover:bg-neutral-700"
-          >
-            Continue
-          </button>
-        </form>
-      </main>
-    )
-  }
-
   return (
-    <main className="mx-auto max-w-xl px-6 py-12">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="font-serif text-2xl">Upload blog post</h1>
-        <Link href="/blog" className="text-sm text-[#c9a84c] hover:underline">
-          View blog &rarr;
-        </Link>
-      </div>
-      <p className="mb-6 text-sm text-neutral-500">
-        PDF &rarr; published at <code>/blog/[slug]</code>
+    <main className="mx-auto max-w-3xl px-6 py-12">
+      <h1 className="font-serif text-3xl text-neutral-900">New blog post</h1>
+      <p className="mt-2 text-sm text-neutral-600">
+        Paste article text below. Separate paragraphs with blank lines. PDF is
+        optional (shown as a download link at the bottom of the post).
       </p>
 
-      {status.kind === 'ok' && (
-        <div className="mb-6 rounded border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
-          &check; Post published &mdash;{' '}
-          <Link
-            href={`/blog/${status.slug}`}
-            className="font-medium text-[#c9a84c] hover:underline"
-          >
-            View post &rarr;
-          </Link>
-        </div>
-      )}
-      {status.kind === 'error' && (
-        <div className="mb-6 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-          {status.msg}
-        </div>
-      )}
+      <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+        <Field label="Admin password" required>
+          <input
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
+          />
+        </Field>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <label className="block">
-          <span className="text-sm text-neutral-700">Title *</span>
+        <Field label="Title" required>
           <input
             type="text"
+            required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 block w-full rounded border border-neutral-300 px-3 py-2"
-            required
+            className="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
           />
-        </label>
+        </Field>
 
-        <label className="block">
-          <span className="text-sm text-neutral-700">
-            Excerpt <span className="text-neutral-400">(optional)</span>
-          </span>
-          <textarea
-            value={excerpt}
-            onChange={(e) => setExcerpt(e.target.value)}
-            rows={3}
-            className="mt-1 block w-full rounded border border-neutral-300 px-3 py-2"
-          />
-        </label>
-
-        <label className="block">
-          <span className="text-sm text-neutral-700">Author</span>
+        <Field
+          label="Author"
+          required
+          hint='Format: "Name, Title, Firm" - comma-separated. First segment becomes the byline name, rest become credentials.'
+        >
           <input
             type="text"
+            required
+            placeholder="Jane Smith, Partner, Tax Disputes, Example LLP"
             value={author}
             onChange={(e) => setAuthor(e.target.value)}
-            className="mt-1 block w-full rounded border border-neutral-300 px-3 py-2"
+            className="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
           />
-        </label>
+        </Field>
 
-        <label className="block">
-          <span className="text-sm text-neutral-700">PDF file *</span>
+        <Field label="Standfirst (excerpt)" hint="1-2 sentences under the headline. Optional.">
+          <textarea
+            rows={3}
+            value={excerpt}
+            onChange={(e) => setExcerpt(e.target.value)}
+            className="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
+          />
+        </Field>
+
+        <Field label="Body" required hint="Separate paragraphs with a blank line.">
+          <textarea
+            rows={20}
+            required
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            className="w-full rounded border border-neutral-300 px-3 py-2 font-mono text-sm"
+          />
+        </Field>
+
+        <Field label="PDF (optional)" hint="If provided, shown as a download link at the bottom of the post.">
           <input
             type="file"
             accept="application/pdf"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="mt-1 block w-full text-sm"
-            required
+            onChange={(e) => setPdf(e.target.files?.[0] || null)}
+            className="text-sm"
           />
-        </label>
+        </Field>
 
         <button
           type="submit"
           disabled={status.kind === 'uploading'}
-          className="rounded bg-[#c9a84c] px-5 py-2 text-sm font-medium text-neutral-900 hover:bg-[#b8983f] disabled:opacity-50"
+          className="rounded bg-neutral-900 px-4 py-2 text-sm text-white disabled:opacity-50"
         >
-          {status.kind === 'uploading' ? 'Uploading&hellip;' : 'Publish post'}
+          {status.kind === 'uploading' ? 'Publishing...' : 'Publish'}
         </button>
+
+        {status.kind === 'ok' && (
+          <p className="text-sm text-green-700">
+            Published.{' '}
+            <Link href={'/blog/' + status.slug} className="underline">
+              View post &rarr;
+            </Link>
+          </p>
+        )}
+        {status.kind === 'error' && (
+          <p className="text-sm text-red-700">Error: {status.msg}</p>
+        )}
       </form>
     </main>
+  )
+}
+
+function Field({
+  label,
+  required,
+  hint,
+  children,
+}: {
+  label: string
+  required?: boolean
+  hint?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div>
+      <label className="block text-xs uppercase tracking-wider text-neutral-500">
+        {label}
+        {required && <span className="ml-1 text-red-600">*</span>}
+      </label>
+      <div className="mt-1">{children}</div>
+      {hint && <p className="mt-1 text-xs text-neutral-500">{hint}</p>}
+    </div>
   )
 }
