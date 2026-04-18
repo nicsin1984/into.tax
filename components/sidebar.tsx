@@ -444,6 +444,7 @@ export function Sidebar({
       <div className="hidden md:block">
         <EmailCapture />
       </div>
+      <BlogTeaser />
       <SpotlightPanel spotlights={spotlights} />
       <TrendingStories articles={trending} />
       <div className="border-t border-border" />
@@ -461,4 +462,3 @@ export function Sidebar({
     </aside>
   )
 }
-      <BlogTeaser />
