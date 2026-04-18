@@ -2,29 +2,30 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { createClient } from "@supabase/supabase-js"
 
 type Post = {
   slug: string
   title: string
-  excerpt: string | null
   author: string
   published_at: string
 }
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-)
-
 function bylineName(author: string) {
-  return author.split(",")[0].trim()
+  try {
+    return author.split(",")[0].trim()
+  } catch {
+    return author || ""
+  }
 }
 
 function shortDate(iso: string) {
-  return new Date(iso)
-    .toLocaleDateString("en-GB", { day: "numeric", month: "short" })
-    .toUpperCase()
+  try {
+    return new Date(iso)
+      .toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+      .toUpperCase()
+  } catch {
+    return ""
+  }
 }
 
 export function BlogTeaser() {
@@ -33,17 +34,39 @@ export function BlogTeaser() {
 
   useEffect(() => {
     let cancelled = false
-    supabase
-      .from("blog_posts")
-      .select("slug, title, excerpt, author, published_at")
-      .eq("is_published", true)
-      .order("published_at", { ascending: false })
-      .limit(3)
-      .then(({ data, error }) => {
-        if (cancelled) return
-        setPosts(error || !data ? [] : data)
-        setLoaded(true)
-      })
+
+    async function loadPosts(): Promise<Post[]> {
+      try {
+        const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+        const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+        if (!url || !key) return []
+
+        const mod = await import("@supabase/supabase-js")
+        const supabase = mod.createClient(url, key)
+        const { data, error } = await supabase
+          .from("blog_posts")
+          .select("slug, title, author, published_at")
+          .eq("is_published", true)
+          .order("published_at", { ascending: false })
+          .limit(3)
+
+        if (error || !data) return []
+        return data as Post[]
+      } catch {
+        return []
+      }
+    }
+
+    loadPosts().then((result) => {
+      if (cancelled) return
+      setPosts(result)
+      setLoaded(true)
+    }).catch(() => {
+      if (cancelled) return
+      setPosts([])
+      setLoaded(true)
+    })
+
     return () => {
       cancelled = true
     }
