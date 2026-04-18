@@ -35,37 +35,19 @@ export function BlogTeaser() {
   useEffect(() => {
     let cancelled = false
 
-    async function loadPosts(): Promise<Post[]> {
-      try {
-        const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-        const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-        if (!url || !key) return []
-
-        const mod = await import("@supabase/supabase-js")
-        const supabase = mod.createClient(url, key)
-        const { data, error } = await supabase
-          .from("blog_posts")
-          .select("slug, title, author, published_at")
-          .eq("is_published", true)
-          .order("published_at", { ascending: false })
-          .limit(3)
-
-        if (error || !data) return []
-        return data as Post[]
-      } catch {
-        return []
-      }
-    }
-
-    loadPosts().then((result) => {
-      if (cancelled) return
-      setPosts(result)
-      setLoaded(true)
-    }).catch(() => {
-      if (cancelled) return
-      setPosts([])
-      setLoaded(true)
-    })
+    fetch("/api/blog/latest")
+      .then((res) => (res.ok ? res.json() : { posts: [] }))
+      .then((data) => {
+        if (cancelled) return
+        const list = Array.isArray(data?.posts) ? data.posts : []
+        setPosts(list)
+        setLoaded(true)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setPosts([])
+        setLoaded(true)
+      })
 
     return () => {
       cancelled = true
