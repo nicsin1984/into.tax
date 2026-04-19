@@ -16,10 +16,15 @@ export function SpotlightShareButtons({ spotlight, slug }: { spotlight: Spotligh
   const shareUrl = `https://into.tax/spotlight#${slug}`
   const encodedUrl = encodeURIComponent(shareUrl)
   
+  // LinkedIn share includes summary in URL
+  const linkedInTitle = encodeURIComponent(`${spotlight.person_name} - into.tax Spotlight`)
+  const linkedInSummary = encodeURIComponent(
+    spotlight.headline || `${spotlight.person_name}, ${spotlight.job_title}${spotlight.firm ? ` at ${spotlight.firm}` : ''}`
+  )
   const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`
   
   const xText = encodeURIComponent(
-    `${spotlight.person_name} featured in this week's @intotax In the Spotlight${spotlight.specialism ? ` for their work on ${spotlight.specialism}` : ''}`
+    `${spotlight.person_name} featured in this week's into.tax In the Spotlight${spotlight.specialism ? ` for their work in ${spotlight.specialism}` : ''} 🔦`
   )
   const xShareUrl = `https://x.com/intent/tweet?text=${xText}&url=${encodedUrl}`
   
