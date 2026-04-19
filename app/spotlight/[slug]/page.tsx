@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Masthead } from "@/components/masthead"
 import { DeadlineTicker } from "@/components/deadline-ticker"
 import { SpotlightCard } from "@/components/spotlight-card"
+import { EmailCapture } from "@/components/sidebar"
 import { getSpotlightBySlug, getKeyDates, slugifyName } from "@/lib/queries"
 
 export const revalidate = 0
@@ -127,6 +128,11 @@ export default async function SpotlightProfilePage({ params }: RouteParams) {
           slug={slug}
           standalone
         />
+
+        {/* Subscribe CTA — appears after the profile, when the reader is primed */}
+        <div className="mt-12 max-w-md mx-auto">
+          <EmailCapture />
+        </div>
 
         <div className="mt-16 pt-8 border-t border-[#E8DFD6] text-center">
           <Link
