@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { Linkedin } from "lucide-react"
 import { SpotlightShareButtons } from "@/components/spotlight-share"
 import type { Spotlight } from "@/lib/queries"
@@ -133,18 +132,6 @@ export function SpotlightCard({ spotlight: s, slug, standalone = false }: Props)
 
         {/* Share buttons */}
         <SpotlightShareButtons spotlight={s} slug={slug} />
-
-        {/* Permanent link to dedicated profile page (only shown on archive view) */}
-        {!standalone && (
-          <div className="mt-4 pt-3 border-t border-[#F0E8E0]">
-            <Link
-              href={`/spotlight/${slug}`}
-              className="text-[11px] font-mono text-[#8B7B6B] hover:text-[#A0522D] transition-colors"
-            >
-              View full profile &rarr;
-            </Link>
-          </div>
-        )}
       </div>
     </article>
   )
