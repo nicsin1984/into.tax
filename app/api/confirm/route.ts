@@ -25,9 +25,11 @@ export async function GET(request: Request) {
     .eq("confirmation_token", token)
     .select()
 
-  if (error || !data?.length) {
-    return NextResponse.redirect("https://into.tax?signup=invalid")
+  if (data?.length) {
+    return NextResponse.redirect("https://into.tax?signup=confirmed")
   }
 
+  // Token already used or not found — redirect to confirmed either way
+  // Can't distinguish between already-confirmed and invalid once token is nulled
   return NextResponse.redirect("https://into.tax?signup=confirmed")
 }
