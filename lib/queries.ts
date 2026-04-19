@@ -7,6 +7,17 @@ function createClient() {
   return createSupabaseClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 }
 
+/**
+ * Shared slugify used by route, sitemap, share buttons, and spotlight cards.
+ * Must remain a single source of truth — changing this invalidates existing URLs.
+ */
+export function slugifyName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
 export type Article = {
   id: string
   title: string
@@ -49,6 +60,8 @@ export type Spotlight = {
   specialism: string | null
   paragraph: string
   source_evidence: string | null
+  news_hook_url: string | null
+  news_hook_label: string | null
   linkedin_url: string | null
   issue_date: string
   published: boolean
@@ -83,7 +96,6 @@ export async function getWireArticles() {
     .select("*")
     .order("published_at", { ascending: false })
     .limit(30)
-
   return data || []
 }
 
@@ -115,7 +127,6 @@ export async function getTrendingArticles() {
     .select("*")
     .order("views", { ascending: false })
     .limit(5)
-
   return data || []
 }
 
@@ -146,7 +157,6 @@ export async function getArticlesByCategory(category: string) {
     .select("*")
     .eq("category", category)
     .order("published_at", { ascending: false })
-
   return data || []
 }
 
@@ -160,7 +170,6 @@ export async function getArticlesByTag(tag: string) {
     .select("*")
     .contains("tags", [tag])
     .order("published_at", { ascending: false })
-
   return data || []
 }
 
@@ -177,7 +186,6 @@ export async function getGovernanceArticles() {
     .contains("tags", ["Compliance"])
     .order("published_at", { ascending: false })
     .limit(3)
-
   return data || []
 }
 
@@ -192,12 +200,12 @@ export async function getSpotlights(limit = 5) {
     .eq("published", true)
     .order("issue_date", { ascending: false })
     .limit(limit)
-
   return data || []
 }
 
 /**
  * All spotlight entries for archive page, grouped by issue_date.
+ * Returns only published entries for public archive display.
  */
 export async function getAllSpotlights() {
   const supabase = createClient()
@@ -206,8 +214,32 @@ export async function getAllSpotlights() {
     .select("*")
     .eq("published", true)
     .order("issue_date", { ascending: false })
-
   return data || []
+}
+
+/**
+ * ALL spotlight entries regardless of published status.
+ * Used by sitemap and by the [slug] route so that every profile ever featured
+ * retains a permanent, indexable URL even after rotation.
+ */
+export async function getEverySpotlight(): Promise<Spotlight[]> {
+  const supabase = createClient()
+  const { data } = await supabase
+    .from("spotlight")
+    .select("*")
+    .order("issue_date", { ascending: false })
+  return data || []
+}
+
+/**
+ * Look up a single spotlight by slugified person_name.
+ * Matches regardless of published status — fetches every row and compares
+ * slugs in memory so the slug algorithm always matches the route.
+ * Returns null if no row matches.
+ */
+export async function getSpotlightBySlug(slug: string): Promise<Spotlight | null> {
+  const all = await getEverySpotlight()
+  return all.find(s => slugifyName(s.person_name) === slug) || null
 }
 
 /**
@@ -221,6 +253,7 @@ export async function getFilteredArticles(options: {
   limit?: number
 }) {
   const supabase = createClient()
+
   let query = supabase
     .from("articles")
     .select("*")
