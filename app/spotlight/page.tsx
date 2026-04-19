@@ -5,6 +5,7 @@ import { getKeyDates } from "@/lib/queries"
 import Link from "next/link"
 import { ShareThisWeekButton } from "@/components/spotlight-share"
 import { SpotlightCard } from "@/components/spotlight-card"
+import { EmailCapture } from "@/components/sidebar"
 import { ScrollToHash } from "@/components/scroll-to-hash"
 
 export const revalidate = 0
@@ -132,7 +133,12 @@ export default async function SpotlightArchivePage() {
           </div>
         )}
 
-        <div className="mt-16 pt-8 border-t border-[#E8DFD6] text-center">
+        {/* Subscribe CTA */}
+        <div className="mt-16 max-w-md mx-auto">
+          <EmailCapture />
+        </div>
+
+        <div className="mt-12 pt-8 border-t border-[#E8DFD6] text-center">
           <Link
             href="/"
             className="text-[12px] font-mono text-[#8B7B6B] hover:text-[#A0522D] transition-colors"
