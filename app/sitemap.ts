@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { createClient } from '@supabase/supabase-js'
+import { getEverySpotlight, slugifyName } from '@/lib/queries'
 
 export const revalidate = 3600
 
@@ -27,5 +28,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  return [...staticPages, ...blogUrls]
+  // Every spotlight profile ever featured gets a permanent indexable URL.
+  // Uses the shared slugifyName helper to stay in sync with the route handler.
+  const allSpotlights = await getEverySpotlight()
+  const spotlightUrls: MetadataRoute.Sitemap = allSpotlights.map(s => ({
+    url: `https://into.tax/spotlight/${slugifyName(s.person_name)}`,
+    lastModified: s.issue_date ? new Date(s.issue_date) : new Date(),
+    changeFrequency: 'yearly',
+    priority: 0.7,
+  }))
+
+  return [...staticPages, ...blogUrls, ...spotlightUrls]
 }
