@@ -9,7 +9,7 @@ function createClient() {
 
 /**
  * Shared slugify used by route, sitemap, share buttons, and spotlight cards.
- * Must remain a single source of truth — changing this invalidates existing URLs.
+ * Must remain a single source of truth â changing this invalidates existing URLs.
  */
 export function slugifyName(name: string): string {
   return name
@@ -79,7 +79,7 @@ export async function getLeadStories() {
     .from("articles")
     .select("*")
     .in("priority", ["high", "medium"])
-    .order("published_at", { ascending: false })
+    .order("published_at", { ascending: false, nullsFirst: false })
     .limit(6)
 
   if (!leads || error) return []
@@ -94,7 +94,7 @@ export async function getWireArticles() {
   const { data, error } = await supabase
     .from("articles")
     .select("*")
-    .order("published_at", { ascending: false })
+    .order("published_at", { ascending: false, nullsFirst: false })
     .limit(30)
   return data || []
 }
@@ -156,7 +156,7 @@ export async function getArticlesByCategory(category: string) {
     .from("articles")
     .select("*")
     .eq("category", category)
-    .order("published_at", { ascending: false })
+    .order("published_at", { ascending: false, nullsFirst: false })
   return data || []
 }
 
@@ -169,7 +169,7 @@ export async function getArticlesByTag(tag: string) {
     .from("articles")
     .select("*")
     .contains("tags", [tag])
-    .order("published_at", { ascending: false })
+    .order("published_at", { ascending: false, nullsFirst: false })
   return data || []
 }
 
@@ -184,7 +184,7 @@ export async function getGovernanceArticles() {
     .select("*")
     .eq("category", "hmrc-practice")
     .contains("tags", ["Compliance"])
-    .order("published_at", { ascending: false })
+    .order("published_at", { ascending: false, nullsFirst: false })
     .limit(3)
   return data || []
 }
@@ -233,7 +233,7 @@ export async function getEverySpotlight(): Promise<Spotlight[]> {
 
 /**
  * Look up a single spotlight by slugified person_name.
- * Matches regardless of published status — fetches every row and compares
+ * Matches regardless of published status â fetches every row and compares
  * slugs in memory so the slug algorithm always matches the route.
  * Returns null if no row matches.
  */
@@ -257,7 +257,7 @@ export async function getFilteredArticles(options: {
   let query = supabase
     .from("articles")
     .select("*")
-    .order("published_at", { ascending: false })
+    .order("published_at", { ascending: false, nullsFirst: false })
 
   // Category filter
   if (options.category && options.category !== "All") {
