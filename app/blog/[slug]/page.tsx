@@ -16,6 +16,7 @@ type BlogPost = {
   excerpt: string | null
   body: string | null
   author: string
+  author_slug: string | null
   pdf_url: string
   published_at: string
 }
@@ -24,7 +25,7 @@ async function getPost(slug: string): Promise<BlogPost | null> {
   const supabase = createClient(SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY!)
   const { data, error } = await supabase
     .from('blog_posts')
-    .select('id, title, slug, excerpt, body, author, pdf_url, published_at')
+    .select('id, title, slug, excerpt, body, author, author_slug, pdf_url, published_at')
     .eq('slug', slug)
     .eq('is_published', true)
     .maybeSingle()
@@ -87,24 +88,32 @@ export default async function BlogPostPage({
           &larr; All posts
         </Link>
       </nav>
-
       <p className="mb-4 text-xs uppercase tracking-[0.2em] text-[#c9a84c]">
         Guest Voice
       </p>
-
       <h1 className="font-serif text-3xl leading-tight text-neutral-900 sm:text-4xl md:text-5xl">
         {post.title}
       </h1>
-
       {post.excerpt && (
         <p className="mt-6 font-serif text-xl leading-relaxed text-neutral-700 sm:text-2xl">
           {post.excerpt}
         </p>
       )}
-
       <div className="mt-8 border-y border-neutral-200 py-4 text-sm">
         <p className="text-neutral-900">
-          <span className="font-medium">By {name}</span>
+          <span className="font-medium">
+            By{' '}
+            {post.author_slug ? (
+              <Link
+                href={`/authors/${post.author_slug}`}
+                className="underline decoration-neutral-300 underline-offset-4 hover:decoration-neutral-700 hover:text-neutral-700"
+              >
+                {name}
+              </Link>
+            ) : (
+              name
+            )}
+          </span>
         </p>
         {credentials && (
           <p className="mt-0.5 text-neutral-600">{credentials}</p>
@@ -113,7 +122,6 @@ export default async function BlogPostPage({
           {formatDate(post.published_at)}
         </p>
       </div>
-
       {paragraphs.length > 0 ? (
         <article className="mt-10 font-serif text-lg leading-relaxed text-neutral-900">
           {paragraphs.map((p, i) => (
@@ -138,7 +146,6 @@ export default async function BlogPostPage({
           />
         </div>
       )}
-
       {post.pdf_url && (
         <aside className="mt-12 border-t border-neutral-200 pt-6">
           <p className="text-xs uppercase tracking-wider text-neutral-500">
@@ -154,7 +161,6 @@ export default async function BlogPostPage({
           </a>
         </aside>
       )}
-
       <footer className="mt-16 border-t border-neutral-200 pt-6">
         <Link
           href="/blog"
